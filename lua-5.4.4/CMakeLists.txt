@@ -52,6 +52,9 @@ target_link_libraries(lua_internal INTERFACE lua_include)
 
 if(LUA_ENABLE_SHARED)
     add_library(lua_shared SHARED ${LUA_LIB_SRCS})
+    if (MSVC)
+        set_property(TARGET lua_shared PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif ()
     target_link_libraries(lua_shared PRIVATE lua_internal PUBLIC lua_include)
     set_target_properties(lua_shared PROPERTIES
         VERSION "${PACKAGE_VERSION}"
@@ -70,6 +73,9 @@ if(LUA_ENABLE_SHARED)
 endif()
 
 add_library(lua_static STATIC ${LUA_LIB_SRCS})
+if (MSVC)
+    set_property(TARGET lua_static PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif ()
 target_link_libraries(lua_static PRIVATE lua_internal PUBLIC lua_include)
 set_target_properties(lua_static PROPERTIES
     VERSION "${PACKAGE_VERSION}"
@@ -112,6 +118,11 @@ if(LUA_BUILD_BINARY)
     CHECK_INCLUDE_FILE("readline/readline.h" HAVE_READLINE_READLINE_H)
 
     add_executable(lua "src/lua.c")
+
+    if (MSVC)
+        set_property(TARGET lua PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif ()
+
     # Can not use lua_shared because some symbols are not exported
     target_link_libraries(lua PRIVATE lua_static)
     set_target_properties(lua PROPERTIES 
@@ -126,6 +137,10 @@ endif()
 
 if(LUA_BUILD_COMPILER)
     add_executable(luac "src/luac.c")
+    if (MSVC)
+        set_property(TARGET luac PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif ()
+
     target_link_libraries(luac PRIVATE lua_static)
     set_target_properties(luac PROPERTIES 
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
